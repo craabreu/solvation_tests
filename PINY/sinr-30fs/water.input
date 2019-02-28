@@ -63,8 +63,8 @@
     \resmpl_atm_nhc{0}
     \atm_nhc_tau_def{10.0}
     \atm_nhc_gamma_def{0.1}
-    \yosh_steps_nhc{7}
-    \respa_steps_nhc{4}
+    \yosh_steps_nhc{1}
+    \respa_steps_nhc{5}
     \atm_nhc_len{1}
     \respa_xi_opt{3}
 
