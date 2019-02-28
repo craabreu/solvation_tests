@@ -6,8 +6,8 @@ the SIN(R) method, as implemented in [PINY], vary with the size of the outer tim
 
 Some modifications were made to the original example available in [PINY]:
 
-1. File `coords.init`: box vectors were changed to produce a cubic box with side length of 24.736
-angstroms, thus resulting in the [SPC/Fw] density of 1.012 g/cc.
+1. File `coords.init`: box vectors were changed to produce a cubic box with side length of 24.653
+angstroms, thus resulting in a density of 1.022 g/cc.
 
 2. File `pi_md.inter`: Cut-off distance was changed to 12.0 angstroms.
 
