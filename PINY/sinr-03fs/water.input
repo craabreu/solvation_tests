@@ -4,7 +4,7 @@
   \ensemble_typ{nvt_isok}
   \num_time_step{2000000}
   \restart_type{restart_pos}  initial restart_pos restart_posvel restart_all
-  \time_step{$TIMESTEP}
+  \time_step{3}
   \temperature{298.15}
   \generic_fft_opt{off}
 
@@ -46,7 +46,7 @@
 
    \init_resmp_atm_vel{off}
    \resmpl_frq_atm_vel{0}
-   \respa_steps_lrf{$TIMESTEP/3}
+   \respa_steps_lrf{1}
    \respa_rheal{3}
    \poten_rheal{1}
    \respa_inter_new{on}
@@ -72,11 +72,11 @@
 
 ~sim_write_def[
     \SIM_NAME{water.out}
-    \write_screen_freq{90/$TIMESTEP}
+    \write_screen_freq{30}
     \instant_file{water.iavg}
     \write_inst_freq{10000000}
     \atm_pos_file{water.confp}
-    \write_pos_freq{360/$TIMESTEP}
+    \write_pos_freq{120}
     \atm_vel_file{water.confv}
     \write_vel_freq{1000000}
     \atm_force_file{water.conff}
