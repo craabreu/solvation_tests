@@ -23,6 +23,10 @@ angstroms, thus resulting in a density of 1.022 g/cc.
 
     - Nose-Hoover chain length changed to 1
 
+    - Yoshida-Suzuki scheme disabled
+
+    - Nose-Hoover splitting changed to 5
+
     - Explicit definition of potential healing length of 1 angstrom
 
 [SPC/Fw]: https://doi.org/10.1063/1.2136877
