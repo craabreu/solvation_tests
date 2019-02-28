@@ -4,7 +4,7 @@
 #SBATCH -N 1              # Total number of nodes requested
 #SBATCH -n 7              # Total number of mpi tasks requested
 #SBATCH --mem=10GB        # To specify required memory per node
-#SBATCH -t 90:00:00       # Run time (hh:mm:ss) - 24 hours
+#SBATCH -t 120:00:00      # Run time (hh:mm:ss) - 24 hours
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ca2356@nyu.edu
 
