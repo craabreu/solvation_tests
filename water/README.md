@@ -6,11 +6,11 @@ method implementations in [PINY] and [atomsmm].
 
 The simulation conditions are:
 
-    - Temperature: 298.15 K
+- Temperature: 298.15 K
 
-    - Nose-Hoover chain length: 1
+- Nose-Hoover chain length: 1
 
-    - Dispersion correction: `False`
+- Dispersion correction: `False`
 
 
 [SPC/Fw]: https://doi.org/10.1063/1.2136877
