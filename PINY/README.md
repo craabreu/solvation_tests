@@ -17,11 +17,13 @@ angstroms, thus resulting in the [SPC/Fw] density of 1.012 g/cc.
 
 5. File `water.parm`: Oxygen and hydrogen charges changes to -0.82 and 0.41, respectively.
 
-6. File `water.input`: 
+6. File `water.input`:
 
     - Temperature changed to 298.15 K
 
     - Nose-Hoover chain length changed to 1
+
+    - Explicit definition of potential healing length of 1 angstrom
 
 [SPC/Fw]: https://doi.org/10.1063/1.2136877
 [PINY]: https://github.com/craabreu/PINY

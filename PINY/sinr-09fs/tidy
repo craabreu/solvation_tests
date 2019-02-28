@@ -1,0 +1,2 @@
+NAME=water
+/bin/rm -f $NAME $NAME.confp $NAME.iavg $NAME.confv $NAME.conff $NAME.out_pos $NAME $NAME.out $NAME.coords_out w64_P1.coords_out

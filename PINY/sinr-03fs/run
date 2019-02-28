@@ -1,0 +1,2 @@
+NAME=water
+$HOME/Software/PINY/runable/piny_md_linux $NAME.input
