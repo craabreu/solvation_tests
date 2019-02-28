@@ -1,1 +1,2 @@
-../../runable/piny_md_linux water.input
+NAME=water
+$HOME/Software/PINY/runable/piny_md_linux $NAME.input

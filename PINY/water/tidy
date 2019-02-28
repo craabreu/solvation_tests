@@ -1,2 +1,2 @@
-/bin/rm -f water water.confp water.iavg water.confv water.conff water.out_pos water water.out water.coords_out w64_P1.coords_out
-
+NAME=water
+/bin/rm -f $NAME $NAME.confp $NAME.iavg $NAME.confv $NAME.conff $NAME.out_pos $NAME $NAME.out $NAME.coords_out w64_P1.coords_out

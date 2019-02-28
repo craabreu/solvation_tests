@@ -5,7 +5,7 @@
   \num_time_step{2000000}
   \restart_type{restart_pos}  initial restart_pos restart_posvel restart_all
   \time_step{90.0}
-  \temperature{300}
+  \temperature{298.15}
   \generic_fft_opt{off}
 
 ]
@@ -64,7 +64,7 @@
     \atm_nhc_gamma_def{0.1}
     \yosh_steps_nhc{7}
     \respa_steps_nhc{4}
-    \atm_nhc_len{4}
+    \atm_nhc_len{1}
     \respa_xi_opt{3}
 
 ]
