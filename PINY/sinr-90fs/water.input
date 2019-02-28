@@ -2,7 +2,7 @@
 
   \simulation_typ{md}
   \ensemble_typ{nvt_isok}
-  \num_time_step{2000000}
+  \num_time_step{40000}
   \restart_type{restart_pos}  initial restart_pos restart_posvel restart_all
   \time_step{90}
   \temperature{298.15}
