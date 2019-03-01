@@ -69,7 +69,10 @@ simulation = openmm.app.Simulation(pdb.topology, respa_system, integrator, platf
 simulation.context.setPositions(pdb.positions)
 simulation.context.setVelocitiesToTemperature(temp, seed)
 
-computer = atomsmm.ComputingSystem(openmm_system)
+computer = atomsmm.PressureComputer(openmm_system,
+        pdb.topology,
+        openmm.Platform.getPlatformByName('CPU'),
+        temperature=temp)
 
 dataReporter = atomsmm.ExtendedStateDataReporter(stdout, reportInterval, separator=',',
         step=True,
@@ -82,10 +85,9 @@ dataReporter = atomsmm.ExtendedStateDataReporter(stdout, reportInterval, separat
         nonbondedVirial=True,
         molecularVirial=True,
         molecularPressure=True,
-        bathTemperature=temp,
         molecularKineticEnergy=True,
         coulombEnergy=True,
-        computer=computer,
+        pressure_computer=computer,
         speed=True,
         extraFile=f'{base}.csv')
 
