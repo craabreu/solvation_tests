@@ -32,4 +32,7 @@ case+=("90")
 nsteps+=("40000")
 device+=("3")
 
+mkdir -p sinr-${case[$1]}fs
+cd sinr-${case[$1]}fs
+cp ../water.* .
 python simulate.py --device ${device[$1]} --timestep ${case[$1]} --nsteps ${nsteps[$1]}
