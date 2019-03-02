@@ -29,5 +29,24 @@ angstroms, thus resulting in a density of 1.022 g/cc.
 
     - Explicit definition of potential healing length of 1 angstrom
 
+
+Execution
+=========
+
+The simulations can be executed in a [Slurm]-based cluster with available [GNU Parallel] installation by using:
+
+    sbatch slurm_job.sh
+
+
+Trajectory Analysis
+===================
+
+Trajectories are converted to the `xyz` format:
+
+    ./convert_trajectories 1 3 6 9 15 30 45 90
+
+
 [SPC/Fw]: https://doi.org/10.1063/1.2136877
 [PINY]: https://github.com/craabreu/PINY
+[Slurm]: https://slurm.schedmd.com
+[GNU Parallel]: https://www.gnu.org/software/parallel/

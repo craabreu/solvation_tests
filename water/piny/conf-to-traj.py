@@ -1,0 +1,733 @@
+#!/usr/bin/env python
+
+"""
+Convert PINY trajectory output ("conf") to XYZ or GRO format.
+
+author: Ondrej Marsalek
+        ondrej.marsalek@gmail.com
+
+"""
+
+import sys
+import re
+import argparse
+import os
+
+import numpy as np
+
+from pprint import pprint
+
+
+def read_XYZ_frame(f_in):
+    """Read one frame of an XYZ file from an open file."""
+
+    # get number of atoms
+    n_atoms = int(f_in.readline())
+
+    # read comment line, strip newline
+    comment = f_in.readline()[:-1]
+
+    pos = np.empty((n_atoms, 3))
+    names = []
+
+    # process all lines of first frame of XYZ file
+    for i in range(n_atoms):
+        items = f_in.readline().split()
+        names.append(items[0])
+        pos[i,:] = map(float, items[1:])
+
+    return comment, names, pos
+
+
+def write_XYZ_frame(f_out, names, data, comment='', fmt_item='%18.10f'):
+    """Write one frame of an XYZ file."""
+
+    fmt = '%3s ' + ' '.join(3*[fmt_item])  + '\n'
+
+    n_atoms = len(names)
+
+    f_out.write('%i\n%s\n' % (n_atoms, comment))
+    for i in range(n_atoms):
+        f_out.write(fmt % (names[i], data[i,0], data[i,1], data[i,2]))
+
+
+def initial_file(pos, P, box, fmt_item='%18.10f'):
+    """Return the PINY initial file as a string."""
+
+    fmt = ' '.join(3*[fmt_item])
+
+    # make box info into 3x3 h-matrix
+    box = np.asarray(box)
+    if box.shape == (3,):
+        h = np.diagflat(box)
+    elif box.shape == (3, 3):
+        h = box
+    else:
+        raise ValueError('Box must be an array of shape (3,) or (3, 3).')
+
+    n_atoms = pos.shape[0]
+
+    header = '%i 1 %i\n' % (n_atoms, P)
+
+    lines = []
+    for i in range(n_atoms):
+        lines.append(fmt % tuple(pos[i,:]))
+
+    for i in range(3):
+        lines.append(fmt % tuple(h[i,:]))
+
+    return header + '\n'.join(lines)
+
+
+def write_XST_frame(f_out, h, frame, fmt = '%6i'+9*' %18.8f'+3*' %4.1f'+'\n'):
+    """Write one frame of an XST file."""
+
+    pos_origin = (0.0, 0.0, 0.0)
+
+    data_line = (frame,) + tuple(h.reshape(-1)) + pos_origin
+
+    f_out.write(fmt % data_line)
+
+
+def write_GRO_frame(f_out, atom_residue_nums, atom_residue_types, atom_names, pos, h=None, comment='', dec=3):
+    """
+    Write one frame of a GRO file.
+
+    Format specification:
+    http://manual.gromacs.org/online/gro.html
+
+    f_out - open file to write to
+    atom_residue_nums - residue number for each atom, GROMACS-style global numbers
+    atom_residue_types - residue type names for each atom
+    atom_names - atom names
+    pos - positions array
+    h - h matrix
+    comment - comment string
+    dec - number of decimal places, GROMACS default is 3, but others should work
+    """
+
+    n_atoms = len(atom_names)
+
+    n_all = dec + 5
+    fmt_item_pos = '%' + str(n_all) + '.' + str(dec) + 'f'
+    fmt_item_vel = ''
+
+    # prepare format string
+    fmt = '%5d%-5s%5s%5d' + 3 * fmt_item_pos + 3 * fmt_item_vel + '\n'
+
+    # write comment and number of atoms
+    f_out.write('%s\n%i\n' % (comment, n_atoms))
+
+    # write atom lines
+    for i in range(n_atoms):
+        data = (atom_residue_nums[i], atom_residue_types[i], atom_names[i], i+1, pos[i,0], pos[i,1], pos[i,2])
+        f_out.write(fmt % data)
+
+    # write box
+    if h is not None:
+        if (h[0,1] == h[1,0] == h[0,2] == h[2,0] == h[1,2] == h[2,1] == 0):
+            f_out.write('%12.6f %12.6f %12.6f\n' % (h[0,0], h[1,1], h[2,2]))
+        else:
+            fmt = ' '.join(9 * ['%12.6f']) + '\n'
+            data = (h[0,0], h[1,1], h[2,2], h[0,1], h[0,2], h[1,0], h[1,2], h[2,0], h[2,1])
+            f_out.write(fmt % data)
+
+
+def read_conf_frame(f_in, n_lines):
+    """Read one frame n_lines long. Return `None` if out of lines."""
+
+    data = np.empty((n_lines, 3))
+    try:
+        for i in range(n_lines):
+            data[i,:] = [float(item) for item in f_in.readline().split()]
+    except ValueError:
+        return None
+
+    return data
+
+
+def input_str(data):
+    """Returns PINY input as a string, from a dictionary or list of pairs."""
+
+    # if this is a dictionary, convert it to a list of pairs first
+    if isinstance(data, dict):
+        data = data.iteritems()
+    elif isinstance(data, (list, tuple)):
+        # nothing needs to be done for a list
+        pass
+    else:
+        # This is something else, but it should not be, complain.
+        message = 'Unexpected data type for %s: %s.' % (filename, str(type(data_file)))
+        raise ValueError(message)
+
+    sections = []
+    for section_name, section in data:
+        if section:
+            lines = ['    \%s{%s}' % items for items in section.iteritems()]
+            sections.append('~%s[\n' % section_name + '\n'.join(lines) + ']')
+
+    return '\n\n'.join(sections)
+
+
+def write_input_directory(data, directory='.'):
+
+    # create directory if it does not exist
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # loop over all data
+    for filename, d in data.iteritems():
+
+        # open file
+        f_out = open(os.path.join(directory, filename), 'w')
+
+        if isinstance(d, str):
+            # already a string, write it directly
+            f_out.write(d)
+
+        else:
+            # assuming an input structure, try to convert to string and write
+            f_out.write(input_str(d))
+
+        f_out.write('\n')
+
+        f_out.close()
+
+
+def read_conf_header(f_in):
+    """Read and parse header information."""
+
+    header_items = f_in.readline().split()
+
+    file_type = header_items[2]
+    Dt = float(header_items[4])
+    period = int(header_items[5])
+    P = int(header_items[6])
+    n_molecule_types = int(header_items[7])
+    n_residue_types = int(header_items[8])
+    n_atom_types = int(header_items[9])
+    n_atoms = int(header_items[10])
+
+    molecule_types = []
+    for i in range(n_molecule_types):
+        molecule_types.append(f_in.readline()[:-1])
+
+    residue_types = []
+    for i in range(n_residue_types):
+        residue_types.append(f_in.readline()[:-1])
+
+    atom_types = []
+    for i in range(n_atom_types):
+        atom_types.append(f_in.readline()[:-1])
+
+    atom_names = []
+    atom_molecule_types = []
+    atom_molecule_nums = []
+    atom_residue_types = []
+    atom_residue_nums = []
+    for i in range(n_atoms):
+        items = f_in.readline().split()
+        data = [int(item) for item in items[2:]]
+        molecule_type, molecule_num, residue_type, residue_num, atom_type = data
+        atom_molecule_types.append(molecule_type)
+        atom_molecule_nums.append(molecule_num)
+        atom_names.append(atom_types[atom_type-1])
+        atom_residue_types.append(residue_types[residue_type-1])
+        atom_residue_nums.append(residue_num)
+
+    # centroid file only has one replica, set P to 1
+    if file_type == 'cen_file':
+        P = 1
+
+    # calculate global residue numbers from PINY per-molecule residue numbers
+    atom_residue_nums_global = [1]
+    res_num_global = 1
+    for i in range(1, len(atom_residue_nums)):
+        # if this atom is in a residue different from that of the previous atom...
+        if ((atom_residue_nums[i] > atom_residue_nums[i-1]) or
+            (atom_molecule_nums[i] != atom_molecule_nums[i-1]) or
+            (atom_molecule_types[i] != atom_molecule_types[i-1])):
+            # ...increment global residue number
+            res_num_global += 1
+        atom_residue_nums_global.append(res_num_global)
+
+    types = [molecule_types, residue_types, atom_types]
+    atom_info = [atom_names, atom_residue_nums_global, atom_residue_types]
+
+    return file_type, Dt, period, P, n_atoms, atom_info, types
+
+
+def _read_line_items(data):
+
+    # assume data is a string
+    lines_data = data.split('\n')
+
+    if len(lines_data) == 1:
+        # if it was single line, assume filename
+        lines = open(lines_data[0]).readlines()
+    else:
+        # else assume actual data
+        lines = lines_data
+
+    items_all = []
+
+    for line in lines:
+
+        #remove comments
+        items = line.split('#')[0].split()
+
+        # if we are left with an empty line, go to next line
+        if not items:
+            continue
+
+        items_all.append(items)
+
+    return items_all
+
+
+def read_atomtypes(data):
+
+    atomtypes = {}
+
+    for items in _read_line_items(data):
+
+        name = items[0]
+        mass = float(items[1])
+        q = float(items[2])
+        int_type = items[3]
+        atomtypes[name] = {
+            'mass': mass,
+            'q': q
+        }
+        if int_type == 'None':
+            atomtypes[name]['type'] = None
+        elif int_type == 'LJ':
+            atomtypes[name]['type'] = int_type
+            atomtypes[name]['sigma'] = float(items[4])
+            atomtypes[name]['eps'] = float(items[5])
+        else:
+            raise ValueError('Unknown non-bonded interaction type: %s' % int_type)
+
+    return atomtypes
+
+
+def read_bondtypes(data):
+
+    bond_all = []
+
+    for items in _read_line_items(data):
+
+        bond = {'atom1': items[0], 'atom2': items[1]}
+
+        pot_type = items[2]
+
+        if pot_type == 'harm':
+            bond['pot_type'] = pot_type
+            bond['eq'] = float(items[3])
+            bond['fk'] = float(items[4])
+        elif pot_type == 'morse':
+            bond['pot_type'] = pot_type
+            bond['eq'] = float(items[3])
+            bond['alpha'] = float(items[4])
+            bond['d0'] = float(items[5])
+        else:
+            raise ValueError('Unknown bond potential type: %s' % pot_type)
+
+        bond_all.append(['bond_parm', bond])
+
+    return bond_all
+
+
+def read_bendtypes(data):
+
+    bend_all = []
+
+    for items in _read_line_items(data):
+
+        bend = {'atom1': items[0], 'atom2': items[1], 'atom3': items[2]}
+
+        pot_type = items[3]
+
+        if pot_type == 'harm':
+            bend['pot_type_bend'] = pot_type
+            bend['eq_bend'] = float(items[4])
+            bend['fk_bend'] = float(items[5])
+        else:
+            raise ValueError('Unknown angle potential type: %s' % pot_type)
+
+        bend_all.append(['bend_parm', bend])
+
+    return bend_all
+
+
+def read_torsiontypes(data):
+
+    torsion_all = []
+
+    for items in _read_line_items(data):
+
+        torsion = {'atom1': items[0],
+                   'atom2': items[1],
+                   'atom3': items[2],
+                   'atom4': items[3]}
+
+        pot_type = items[4]
+
+        if pot_type == 'freq-series':
+
+            items_param = items[5:]
+            n_param = len(items_param)
+            n_param_set = n_param // 3
+
+            # expect triples of values
+            if (n_param % 3) != 0:
+                raise ValueError('Expected triples of values for torsion potential "%s".' % pot_type)
+
+            torsion['nfreq'] = n_param_set
+
+            for i in range(n_param_set):
+                idx = str(i+1)
+                torsion['A'+idx] = int(items_param[3*i])
+                torsion['C'+idx] = float(items_param[3*i+1])
+                torsion['D'+idx] = float(items_param[3*i+2])
+
+        else:
+            raise ValueError('Unknown torsion potential type: %s' % pot_type)
+
+        torsion_all.append(['torsion_param', torsion])
+
+    return torsion_all
+
+
+def combine_inter(atomtypes, min_dist, max_dist, res_dist, verbose=False, LJcomb='LB'):
+    """
+    LJcomb: which combination rule to use for Lennard-Jones, either 'LB' or 'geom'
+    """
+
+    inter_all = []
+    int_type = None
+
+    for name1, a1 in atomtypes.items():
+        for name2, a2 in atomtypes.items():
+            inter = {
+                'atom1': name1,
+                'atom2': name2,
+                'min_dist': min_dist,
+                'max_dist': max_dist,
+                'res_dist': res_dist
+            }
+            type1 = a1['type']
+            type2 = a2['type']
+            if (type1 is None) or (type2 is None):
+                inter['pot_type'] = 'null'
+            elif (type1 == 'LJ') and (type2 == 'LJ'):
+                inter['pot_type'] = 'lennard-jones'
+                eps1 = a1['eps']
+                eps2 = a2['eps']
+                sigma1 = a1['sigma']
+                sigma2 = a2['sigma']
+                if LJcomb == 'LB':
+                    inter['eps'] = np.sqrt(eps1 * eps2)
+                    inter['sig'] = (sigma1 + sigma2) / 2
+                elif LJcomb == 'geom':
+                    inter['eps'] = np.sqrt(eps1 * eps2)
+                    inter['sig'] = np.sqrt(sigma1 + sigma2)
+                else:
+                    msg = 'unknown combination rule for Lennard-Jones: %s' % LJcomb
+                    raise ValueError(msg)
+            else:
+                msg = 'Unknown interaction combination: %s - %s' % (type1, type2)
+                raise ValueError(msg)
+
+            inter_all.append(['inter_parm', inter])
+
+    if verbose:
+        print( 'generated non-bonded interactions:')
+        pprint(inter_all)
+        print()
+
+    return inter_all
+
+
+def generate_parm(moleculetypes, atomtypes, verbose=False):
+
+    parm_all = {}
+
+    # TODO
+    # - check that all bond, bend and torsion types actually exist
+    # - perhaps only take in bonds, calculate bends and torsions on the fly?
+
+    for name, moltype in moleculetypes.items():
+
+        atoms = moltype['atoms']
+
+        parm = [
+            ['molecule_name_def', {
+                'molecule_name': name,
+                'natom': len(atoms)}]]
+
+        for i, atom in enumerate(atoms):
+            parm.append(
+                ['atom_def', {
+                    'atom_typ': atom,
+                    'atom_ind': i+1,
+                    'mass': atomtypes[atom]['mass'],
+                    'charge': atomtypes[atom]['q']}]
+            )
+
+        if 'bonds' in moltype.keys():
+            for bond in moltype['bonds']:
+                parm.append(
+                    ['bond_def', {
+                        'atom1': bond[0],
+                        'atom2': bond[1]}],
+                )
+
+        if 'bends' in moltype.keys():
+            for bend in moltype['bends']:
+                parm.append(
+                    ['bend_def', {
+                        'atom1': bend[0],
+                        'atom2': bend[1],
+                        'atom3': bend[2]}],
+                )
+
+        if 'torsions' in moltype.keys():
+            for torsion in moltype['torsions']:
+                t = ['torsion_def', {
+                    'atom1': torsion[0],
+                    'atom2': torsion[1],
+                    'atom3': torsion[2],
+                    'atom4': torsion[3]}]
+                if len(torsion) > 4:
+                    # assume this is an improper torsion
+                    if torsion[4] == 'improper':
+                        t[1]['label'] = 'improper'
+                    else:
+                        raise ValueError('Expected 5th item of torsion atom list to be "improper".')
+                parm.append(t)
+
+        parm_all[name] = parm
+
+        if verbose:
+            print( 'molecule parameters for "%s":' % name)
+            pprint(parm)
+            print()
+
+    return parm_all
+
+#
+# constants
+#
+
+B2A = 0.52917721092         # Bohr in Angstrom
+B2nm = B2A * 0.1            # Bohr in nanometer
+au2ps = 2.418884326505e-5   # time a.u. in ps
+
+
+#
+# command line arguments and options
+#
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('fns_in', nargs='+', type=str,
+                    help='Input file names - PINY output conf files.')
+
+parser.add_argument('--out', dest='fn_out', type=str, required=True,
+                    help='Output trajectory file name - XYZ or GRO format.')
+
+parser.add_argument('--h-matrix', dest='fn_out_h', type=str,
+                    help='Output file name - h matrix in XST format.')
+
+parser.add_argument('--atom-info', dest='atom_info', action='store_true',
+                    help='information on all atoms.')
+
+parser.add_argument('--decimal', dest='dec', type=int, default=3,
+                    help='Number of decimal places in GRO file.')
+
+# run the option parser and get results
+args = parser.parse_args()
+
+# detect output file type from extension
+ext = args.fn_out.split('.')[-1]
+if ext == 'xyz':
+    file_format = 'xyz'
+elif ext == 'gro':
+    file_format = 'gro'
+else:
+    raise StandardError('Unknown extension: %s' % ext)
+
+#
+# open input files
+#
+
+fs_in = []
+for fn_in in args.fns_in:
+    fs_in.append(open(fn_in, 'r'))
+    header = read_conf_header(fs_in[-1])
+
+file_type, Dt, period, P, n_atoms, atom_info, types = header
+molecule_types, residue_types, atom_types = types
+atom_names, atom_residue_nums_global, atom_residue_types = atom_info
+
+
+#
+# open output files
+#
+
+try:
+    if P > 1:
+        fns_out = [args.fn_out % i for i in range(P)]
+    else:
+        fns_out = [args.fn_out]
+except TypeError:
+    raise StandardError('Output file name must contain one formatting field if P>1.')
+
+fs_out = [open(fns_out[i] , 'w') for i in range(P)]
+
+if args.fn_out_h is not None:
+    f_out_h = open(args.fn_out_h , 'w')
+
+
+#
+# print((header))
+#
+
+print(())
+print(('============'))
+print(('conf-to-traj'))
+print(('============'))
+print(())
+print(('         File type:', file_type))
+print(('   Number of atoms:', n_atoms))
+print(('   Number of beads:', P))
+print(('  Input file names: ' + '\n                    '.join(args.fns_in)))
+print((' Output file names: ' + '\n                    '.join(fns_out)))
+if args.fn_out_h is not None:
+    print(('H-matrix file name:',))
+    print((args.fn_out_h))
+print(())
+print(('Molecule types'))
+print(('--------------'))
+print(())
+for m in molecule_types:
+    print((m))
+print(())
+print(('Residue types'))
+print(('-------------'))
+print(())
+for r in residue_types:
+    print((r))
+print(())
+print(('Atom types'))
+print(('----------'))
+print(())
+for a in atom_types:
+    print((a))
+print(())
+
+if args.atom_info:
+    print(('Atom information'))
+    print(('----------------'))
+    print(())
+    for i in range(n_atoms):
+        data = (i, atom_names[i], atom_residue_nums_global[i], atom_residue_types[i])
+        print(('%4i %3s %4i %5s' % data))
+    print(())
+
+
+#
+# process all frames
+#
+
+i_frame = 1
+fmt_item_xyz = '%' + '%i' % (args.dec+8) + '.' + str(args.dec) + 'f'
+
+for f_in in fs_in:
+
+    done = False
+
+    while True:
+
+        #
+        # read all data for one frame
+        #
+
+        # read atom positions of all replicas
+        pos_all = []
+        for i in range(P):
+            pos = read_conf_frame(f_in, n_atoms)
+            if pos is None:
+                done = True
+                break
+            if np.any(np.isnan(pos)):
+                print(('NaN encountered, aborting.'))
+                done = True
+                break
+            pos_all.append(pos)
+
+        if done:
+            break
+
+        # centroid file contains velocities of first bead here, skip
+        if file_type == 'cen_file':
+            read_conf_frame(f_in, n_atoms)
+
+        # read h matrix
+        # box vectors are columns in PINY
+        h = read_conf_frame(f_in, 3)
+        if h is None:
+            raise StandardError('Incomplete frame, h matrix not found.')
+
+
+        #
+        # write all data for this frame
+        #
+
+        # write all coordinates
+        for i in range(P):
+
+            # put frame number and time in comment line
+            comment = 'i=%i, t=%.6f ps' % (i_frame, i_frame * Dt * period * au2ps)
+
+            if file_type == 'cen_file':
+                comment += ', centroid'
+            else:
+                comment += ', P = %i' % P
+
+            if file_format == 'xyz':
+
+                pos = pos_all[i] * B2A
+                write_XYZ_frame(fs_out[i], atom_names, pos, comment=comment, fmt_item=fmt_item_xyz)
+
+            elif file_format == 'gro':
+
+                write_GRO_frame(fs_out[i],
+                                atom_residue_nums_global,
+                                atom_residue_types,
+                                atom_names,
+                                pos_all[i] * B2nm,
+                                h=h * B2nm,
+                                comment=comment,
+                                dec=args.dec)
+
+            else:
+                raise StandardError('Unexpected file format: %s' % file_format)
+
+        # write h matrix if requested
+        if args.fn_out_h is not None:
+            write_XST_frame(f_out_h, h*B2A, i_frame)
+
+
+        #
+        # report progress and go to next frame
+        #
+
+        print(('Frame %6i done.\r' % i_frame,))
+        sys.stdout.flush()
+
+        i_frame += 1
+
+print(())
+print(())
