@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 for dt in $@; do
     name=$(printf "sinr-%02dfs" $dt)
-    python conf-to-traj.py --out $name.xyz --decimal 8 $name/water.confp
+    cd $name
+    python ../conf-to-traj.py --out $name.xyz --decimal 8 water.confp
+    cd ..
 done

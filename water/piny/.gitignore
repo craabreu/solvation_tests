@@ -3,6 +3,7 @@
 */water.confv
 */water.iavg
 */water.out
+*/*.xyz
 
 *.out
 *.output
