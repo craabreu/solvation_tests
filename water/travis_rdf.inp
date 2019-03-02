@@ -113,3 +113,4 @@ H
 ! How many time steps to use (from this position on)? [all]
 
 ! Use every n-th time step from the trajectory? [1]
+1

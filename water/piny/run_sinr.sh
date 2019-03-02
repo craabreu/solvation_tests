@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 name=sinr-${1}fs
+root=../../../..
 cd $name
 
 # Clean directory and run simulation:
@@ -12,7 +13,7 @@ python ../conf-to-traj.py --out $name.xyz --decimal 8 water.confp
 # Compute radial distribution functions:
 mkdir -p rdf
 cd rdf
-../../../../travis/exe/travis -i ../../../travis_rdf.inp -p ../$name.xyz
+$root/travis/exe/travis -i $root/water/travis_rdf.inp -p ../$name.xyz > ../${name}_rdf.output
 gOO="rdf_H2O_#2_H2O_[Or_Oo].csv"
 gOH="rdf_H2O_#2_H2O_[Or_Ho].csv"
 gHH="rdf_H2O_#2_H2O_[Hr_Ho].csv"
