@@ -13,4 +13,4 @@ module load gnu8/8.2.0
 module load openmpi3/3.1.2
 module load fftw/3.3.8
 
-parallel ./analyze.sh ::: 01 03 06 09 15 30 45 90
+parallel ./analyze_sinr.sh piny ::: 06 09 15 30 45 90
