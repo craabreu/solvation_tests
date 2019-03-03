@@ -87,24 +87,6 @@ H
 ! Add a condition to this observation (y/n)? [no]
 
 ! Add another observation (y/n)? [no]
-y
-! Perform this observation intramolecular (within the reference molecule) (0) or intermolecular (1)? [1]
-0
-! Which atom(s) to take from RM H2O (e.g. "C1,C3-5,H", "*"=all)? [#2]
-O
-! Which atom(s) to take from RM H2O (e.g. "C1,C3-5,H", "*"=all)? [#2]
-H
-! Enter the minimal radius of this RDF in pm: [0]
-80
-! Enter the maximal radius of this RDF in pm: [1200.0]
-120
-! Enter the resolution (bin count) for this RDF: [300]
-120
-! Correct radial distribution for this RDF (y/n)? [yes]
-
-! Save temporal development for this observation (y/n)? [no]
-
-! Add another observation (y/n)? [no]
 
 ! Skip repeated time steps (y/n)? [no]
 
