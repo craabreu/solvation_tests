@@ -1,3 +1,7 @@
-sinr-*fs.csv
-sinr-*fs.pdb
+sin*/*.csv
+sin*/*.pdb
+sin*/*.xyz
+sin*/?df
+
 *.out
+*.output

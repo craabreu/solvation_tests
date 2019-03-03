@@ -32,5 +32,8 @@ case+=("90")
 nsteps+=("40000")
 device+=("3")
 
-cd sinr-${case[$1]}fs
-python simulate.py --device ${device[$1]} --timestep ${case[$1]} --nsteps ${nsteps[$1]}
+name=sinr-${case[$1]}fs
+cd $name
+#python simulate.py --device ${device[$1]} --timestep ${case[$1]} --nsteps ${nsteps[$1]}
+#sed -i -e 's/Ow/O /g' -e 's/Hw/H /g' $name.pdb
+babel -ipdb $name.pdb -oxyz $name.xyz
