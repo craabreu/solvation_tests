@@ -1,12 +1,13 @@
-#!/usr/bin/env bash
-#SBATCH -J sinr           # Job name
-#SBATCH -o job.%j.out     # Name of stdout output file
-#SBATCH -N 1              # Total number of nodes requested
-#SBATCH -n 8              # Total number of mpi tasks requested
-#SBATCH --mem=10GB        # To specify required memory per node
-#SBATCH -t 180:00:00      # Run time (hh:mm:ss) - 24 hours
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=8
+#SBATCH --time=1:00:00
+#SBATCH --mem=20GB
+#SBATCH --job-name=analyze_sinr
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ca2356@nyu.edu
+#SBATCH --output=slurm_%j.out
 
 #module purge
 #module load gnu8/8.2.0
