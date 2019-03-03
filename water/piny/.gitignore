@@ -4,6 +4,8 @@
 */water.iavg
 */water.out
 */*.xyz
+*/*.csv
+*/rdf
 
 *.out
 *.output
