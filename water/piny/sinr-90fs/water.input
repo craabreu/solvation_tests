@@ -76,7 +76,7 @@
     \instant_file{water.iavg}
     \write_inst_freq{10000000}
     \atm_pos_file{water.confp}
-    \write_pos_freq{4}
+    \write_pos_freq{3}
     \atm_vel_file{water.confv}
     \write_vel_freq{1000000}
     \atm_force_file{water.conff}
