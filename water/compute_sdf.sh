@@ -4,14 +4,14 @@ name=sinr-${2}fs
 
 # Compute radial distribution functions:
 cd $dir/$name
-mkdir -p rdf
-cd rdf
+mkdir -p sdf
+cd sdf
 root=../../../..
-$root/travis/exe/travis -i $root/water/travis_rdf.inp -p ../$name.xyz > ${name}_rdf.output
-gOO="rdf_H2O_#2_H2O_[Or_Oo].csv"
-gOH="rdf_H2O_#2_H2O_[Or_Ho].csv"
-gHH="rdf_H2O_#2_H2O_[Hr_Ho].csv"
-paste -d"," <(cut -d";" -f1 $gOO | sed 's/# //g')  \
-            <(cut -d";" -f2 $gOO | sed 's/g(r)/g(O-O)/g') \
-            <(cut -d";" -f2 $gOH | sed 's/g(r)/g(O-H)/g') \
-            <(cut -d";" -f2 $gHH | sed 's/g(r)/g(H-H)/g') > $root/water/$dir/results/${name}_rdf.csv
+$root/travis/exe/travis -i $root/water/travis_sdf.inp -p ../$name.xyz > ${name}_sdf.output
+Odist="sdf_H2O_#2O1H1_H2O_O.s2.cube"
+Hdist="sdf_H2O_#2O1H1_H2O_H.s2.cube"
+molecule="ref_h2o_#2_o1_h1.xyz"
+prefix=$root/water/$dir/results/${name}_sdf
+cp $Odist ${prefix}_O.cube
+cp $Hdist ${prefix}_H.cube
+cp $molecule ${prefix}_mol.xyz
