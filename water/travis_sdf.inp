@@ -1,0 +1,58 @@
+! TRAVIS input file
+! Created with TRAVIS version compiled at Mar  2 2019 11:58:39
+! Source code version: Jan 01 2019
+! Input file written at Sun Mar  3 18:24:32 2019.
+! Use the advanced mode until the analysis selection menu (y/n)? [no] 
+
+! Are the 3 cell vectors of the same size (yes/no)? [yes] 
+
+! Enter length of cell vector in pm: 
+2465.3
+! Create images of the structural formulas (y/n)? [no] 
+
+! Accept these molecules (y) or change something (n)? [yes] 
+
+! Which functions to compute (comma separated)?
+sdf
+! Use the advanced mode for the main part (y/n)? [no] 
+
+! Please enter three comma-separated reference atoms (e.g. "C1,H2,O1"):
+#2,O1,H1
+! Perform this observation intramolecular (within the reference molecule) (0) or intermolecular (1)? [1] 
+
+! Which atoms to observe (e.g. "C1,C3-5,H", "*"=all)? [#2]
+O
+! Please enter radius of this SDF in pm: [1200.0] 
+900
+! Please enter binning resolution of this SDF per dimension: [100] 
+
+! Add a condition to this observation (y/n)? [no] 
+
+! Add another observation (y/n)? [no] 
+y
+! Perform this observation intramolecular (within the reference molecule) (0) or intermolecular (1)? [1] 
+
+! Which atoms to observe (e.g. "C1,C3-5,H", "*"=all)? [#2]
+H
+! Please enter radius of this SDF in pm: [1200.0] 
+900
+! Please enter binning resolution of this SDF per dimension: [100] 
+
+! Add a condition to this observation (y/n)? [no] 
+
+! Add another observation (y/n)? [no] 
+
+! Map a quantity to the surface of the SDF (y/n)? [no] 
+
+! Up to which degree should the SDFs be smoothened (0=not at all)? [2] 
+
+! Calculate SDF values in nm^-3 (n) or relative to uniform density (y)? [no] 
+y
+! Skip repeated time steps (y/n)? [no] 
+
+! In which time step to start processing the trajectory? [1] 
+1667
+! How many time steps to use (from this position on)? [all] 
+
+! Use every n-th time step from the trajectory? [1] 
+
