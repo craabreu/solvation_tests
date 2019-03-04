@@ -47,7 +47,7 @@ H
 ! Up to which degree should the SDFs be smoothened (0=not at all)? [2] 
 
 ! Calculate SDF values in nm^-3 (n) or relative to uniform density (y)? [no] 
-y
+
 ! Skip repeated time steps (y/n)? [no] 
 
 ! In which time step to start processing the trajectory? [1] 
