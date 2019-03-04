@@ -6,12 +6,12 @@ import figstyle
 import os
 
 tools = ['piny', 'openmm']
-timesteps = [1, 3, 6, 9, 15, 30, 45, 90]
+timesteps = ['0p5', '01', '03', '06', '09', '15', '30', '45', '90']
 
 def data(type):
     repo = {tool:[] for tool in tools}
     for dt, tool in itertools.product(timesteps, tools):
-        file = f'{tool}/results/sinr-{dt:02d}fs_{type}.csv'
+        file = f'{tool}/results/sinr-{dt}fs_{type}.csv'
         if os.path.isfile(file):
             repo[tool].append(pd.read_csv(file, skipinitialspace=True))
     return repo
