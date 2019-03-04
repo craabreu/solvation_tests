@@ -48,11 +48,12 @@ properties = dict(Precision='mixed') if platform_name == 'CUDA' else dict()
 if args.device != 'None':
     properties['DeviceIndex'] = args.device
 
-pdb = app.PDBFile(f'{base}.pdb')
+pdb = app.PDBFile(f'water.pdb')
 residues = [atom.residue.name for atom in pdb.topology.atoms()]
-solute_atoms = set(i for (i, name) in enumerate(residues) if name == 'aaa')
+#solute_atoms = set(i for (i, name) in enumerate(residues) if name == 'aaa')
+solute_atoms = set(range(3))
 
-forcefield = app.ForceField(f'{base}.xml')
+forcefield = app.ForceField(f'water.xml')
 openmm_system = forcefield.createSystem(pdb.topology,
                                         nonbondedMethod=openmm.app.PME,
                                         nonbondedCutoff=rcut,
@@ -93,6 +94,7 @@ simulation.context.setVelocitiesToTemperature(temp, seed)
 states_data = pd.read_csv('alchemical_states.inp', sep='\s+', comment='#')
 parameterStates = states_data[['lambda_vdw', 'lambda_coul']]
 for state in reversed(states_data.index):
+    if state <= 7:
         for name, value in parameterStates.iloc[state].items():
             simulation.context.setParameter(name, value)
             print(f'{name} = {value}')
