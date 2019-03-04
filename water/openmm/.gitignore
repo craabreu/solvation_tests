@@ -1,6 +1,10 @@
-sin*/*.csv
-sin*/*.pdb
+sin*/w64_P1.coords_out
+sin*/water.confp
+sin*/water.confv
+sin*/water.iavg
+sin*/water.out
 sin*/*.xyz
+sin*/*.csv
 sin*/?df
 
 *.out
