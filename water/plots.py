@@ -85,6 +85,29 @@ def plot_combined(timestep_pairs):
             ax[i].legend(loc='lower left', ncol=1)
         fig.savefig(f'{tool}_combined.png')
 
+
+# Combined bond-bond distributons:
+def plot_bond_bond(timestep_pairs):
+    npairs = len(timestep_pairs)
+    for tool in tools:
+        fig, ax = plt.subplots(npairs, 1, figsize=(3.37,npairs*2.3), sharex=True)
+        if npairs == 1:
+            ax = [ax]
+        fig.suptitle(f'Combined bond-bond distributions ({tool})')
+        ax[-1].set_xlabel('Distance (\\AA)')
+        for i, timesteps in enumerate(timestep_pairs):
+            combined = data('bbdf', timesteps)
+            for dt, gr, style in zip(timesteps, combined[tool], ['solid', 'dashed']):
+                X = gr.values[:, 0]/100
+                Y = np.array([float(y)/100 for y in gr.columns[1:]])
+                Z = gr.values[:, 1:]
+                cs = ax[i].contour(*np.meshgrid(X, Y), Z, linestyles=style)
+                cs.collections[0].set_label(label[dt])
+            ax[i].set_ylabel('Distance (\\AA)')
+            ax[i].legend(loc='lower left', ncol=1)
+            ax[i].set_aspect(1.0)
+        fig.savefig(f'{tool}_bond_bond.png')
+
 # Average bonds and angles:
 def plot_averages(timesteps):
     fig, ax = plt.subplots(2, 1, figsize=(3.37,4.6), sharex=True)
@@ -107,9 +130,10 @@ def plot_averages(timesteps):
     fig.savefig('average_bonds_and_angles.png')
 
 all = ['0.5', '01', '03', '06', '09', '15', '30', '45', '90']
-plot_rdfs(all)
-plot_bonds(all)
-plot_angles(all)
-plot_combined([('0.5', '90'), ('06', '90')])
-plot_averages(all)
+# plot_rdfs(all)
+# plot_bonds(all)
+# plot_angles(all)
+# plot_combined([('0.5', '90'), ('06', '90')])
+plot_bond_bond([('0.5', '90'), ('06', '90')])
+# plot_averages(all)
 plt.show()
