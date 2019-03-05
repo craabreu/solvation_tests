@@ -85,7 +85,6 @@ def plot_combined(timestep_pairs):
             ax[i].legend(loc='lower left', ncol=1)
         fig.savefig(f'{tool}_combined.png')
 
-
 # Combined bond-bond distributons:
 def plot_bond_bond(timestep_pairs):
     npairs = len(timestep_pairs)
@@ -112,6 +111,7 @@ def plot_bond_bond(timestep_pairs):
 def plot_averages(timesteps):
     fig, ax = plt.subplots(2, 1, figsize=(3.37,4.6), sharex=True)
     fig.suptitle(f'Average bond lengths and angles')
+    ax[-1].set_xlabel('Time step size (fs)')
     for i, type in enumerate(['bond', 'angle']):
         for tool in tools:
             df = pd.read_csv(f'{tool}/results/{type}_stats.csv')
@@ -120,7 +120,6 @@ def plot_averages(timesteps):
                 mean /= 100
             ax[i].plot(dt, mean, marker='o', label=tool)
             ax[i].legend(loc='lower left', ncol=1)
-    ax[1].set_xlabel('Time step size (fs)')
     ax[0].set_xscale('log')
     ax[0].set_ylabel('Bond length (\\AA)')
     ax[0].legend(loc='upper right', ncol=1, title='$r_0 = 1.012$ \\AA')
@@ -128,6 +127,12 @@ def plot_averages(timesteps):
     ax[1].set_ylabel('Angle (\\textdegree)')
     ax[1].legend(loc='lower right', ncol=1, title='$\\theta_0 = 113.24$\\textdegree')
     fig.savefig('average_bonds_and_angles.png')
+
+# Properties:
+def plot_properties(timesteps):
+    fig, ax = plt.subplots(2, 1, figsize=(3.37,4.6), sharex=True)
+    fig.suptitle(f'Average Properties')
+    ax[-1].set_xlabel('Time step size (fs)')
 
 all = ['0.5', '01', '03', '06', '09', '15', '30', '45', '90']
 # plot_rdfs(all)
