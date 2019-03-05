@@ -5,7 +5,7 @@ sin*/water.iavg
 sin*/water.out
 sin*/*.xyz
 sin*/*.csv
-sin*/?df
+sin*/*df
 
 *.out
 *.output
