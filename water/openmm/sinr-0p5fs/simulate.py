@@ -17,6 +17,7 @@ os.putenv('OPENMM_CPU_THREADS', str(numThreads))
 parser = argparse.ArgumentParser()
 parser.add_argument('--nsteps', dest='nsteps', help='number of steps', type=int, required=True)
 parser.add_argument('--device', dest='device', help='the GPU device', default='None')
+parser.add_argument('--secdev', dest='secdev', help='the secondary GPU device', default='None')
 parser.add_argument('--seed', dest='seed', help='the RNG seed', type=int, default=0)
 parser.add_argument('--platform', dest='platform', help='the computation platform', default='CUDA')
 args = parser.parse_args()
@@ -24,7 +25,7 @@ args = parser.parse_args()
 seed = int(1000*time.time()) % 16384 if args.seed == 0 else args.seed
 print(f'Employed RNG seed is {seed}')
 
-base = f'langevin-0p5fs'
+base = f'sinr-0p5fs'
 platform_name = args.platform
 
 dt = 0.5*unit.femtoseconds
@@ -63,7 +64,9 @@ simulation.context.setVelocitiesToTemperature(temp, seed)
 
 computer = atomsmm.PressureComputer(openmm_system,
         pdb.topology,
-        openmm.Platform.getPlatformByName('CPU'),
+#        openmm.Platform.getPlatformByName('CPU'),
+        openmm.Platform.getPlatformByName('CUDA'),
+        dict(Precision='mixed', DeviceIndex=args.secdev),
         temperature=temp)
 
 dataReporter = atomsmm.ExtendedStateDataReporter(stdout, reportInterval, separator=',',
