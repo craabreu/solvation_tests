@@ -7,4 +7,7 @@ cd $name
 #./run > $name.output
 
 # Convert trajectory file to xyz format:
-python ../conf-to-traj.py --out $name.xyz --decimal 8 water.confp
+#python ../conf-to-traj.py --out $name.xyz --decimal 8 water.confp
+
+# Extract properties:
+../extract_properties.sh $1 > ${name}_properties.csv
