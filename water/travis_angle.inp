@@ -35,15 +35,15 @@ O1
 ! Please enter the atom(s) at the tip point (e.g. C7):
 H2
 ! Enter minimal angle between the vectors: [0 deg] 
-60
+70
 ! Enter maximal angle between the vectors: [180 deg] 
-150
+130
 ! Plot ADF against angle (0) or against cosine (1)? [0] 
 
 ! Force this ADF to be mirror-symmetric to the 90 deg line (y/n)? [no] 
 
 ! Please enter the resolution (bin count) for this ADF: [100] 
-180
+120
 ! Save temporal development for this observation (y/n)? [no] 
 
 ! Add another observation (y/n)? [no] 
