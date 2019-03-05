@@ -15,6 +15,7 @@ numThreads = 8
 os.putenv('OPENMM_CPU_THREADS', str(numThreads))
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--timestep', dest='timestep', help='the time step size', required=True)
 parser.add_argument('--nsteps', dest='nsteps', help='number of steps', type=int, required=True)
 parser.add_argument('--device', dest='device', help='the GPU device', default='None')
 parser.add_argument('--secdev', dest='secdev', help='the secondary GPU device', default='None')
@@ -62,12 +63,12 @@ simulation = openmm.app.Simulation(pdb.topology, openmm_system, integrator, plat
 simulation.context.setPositions(pdb.positions)
 simulation.context.setVelocitiesToTemperature(temp, seed)
 
-computer = atomsmm.PressureComputer(openmm_system,
-        pdb.topology,
+#computer = atomsmm.PressureComputer(openmm_system,
+#        pdb.topology,
 #        openmm.Platform.getPlatformByName('CPU'),
-        openmm.Platform.getPlatformByName('CUDA'),
-        dict(Precision='mixed', DeviceIndex=args.secdev),
-        temperature=temp)
+#        openmm.Platform.getPlatformByName('CUDA'),
+#        dict(Precision='mixed', DeviceIndex=args.secdev),
+#        temperature=temp)
 
 dataReporter = atomsmm.ExtendedStateDataReporter(stdout, reportInterval, separator=',',
         step=True,
@@ -75,14 +76,14 @@ dataReporter = atomsmm.ExtendedStateDataReporter(stdout, reportInterval, separat
         kineticEnergy=True,
         totalEnergy=True,
         temperature=True,
-        atomicVirial=True,
-        atomicPressure=True,
-        nonbondedVirial=True,
-        molecularVirial=True,
-        molecularPressure=True,
-        molecularKineticEnergy=True,
-        coulombEnergy=True,
-        pressure_computer=computer,
+#        atomicVirial=True,
+#        atomicPressure=True,
+#        nonbondedVirial=True,
+#        molecularVirial=True,
+#        molecularPressure=True,
+#        molecularKineticEnergy=True,
+#        coulombEnergy=True,
+#        pressure_computer=computer,
         speed=True,
         extraFile=f'{base}.csv')
 

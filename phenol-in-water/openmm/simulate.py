@@ -10,11 +10,8 @@ from simtk import openmm
 from simtk import unit
 from simtk.openmm import app
 
-import os
-numThreads = 8
-os.putenv('OPENMM_CPU_THREADS', str(numThreads))
-
 parser = argparse.ArgumentParser()
+parser.add_argument('--timestep', dest='timestep', help='time step size', type=int, required=True)
 parser.add_argument('--nsteps', dest='nsteps', help='number of steps', type=int, required=True)
 parser.add_argument('--device', dest='device', help='the GPU device', default='None')
 parser.add_argument('--secdev', dest='secdev', help='the secondary GPU device', default='None')
@@ -25,10 +22,10 @@ args = parser.parse_args()
 seed = int(1000*time.time()) % 16384 if args.seed == 0 else args.seed
 print(f'Employed RNG seed is {seed}')
 
-base = f'sinr-0p5fs'
+base = f'sinr-{args.timestep:02d}fs'
 platform_name = args.platform
 
-dt = 0.5*unit.femtoseconds
+dt = args.timestep*unit.femtoseconds
 temp = 298.15*unit.kelvin
 rcut = 12*unit.angstroms
 rswitch = 11*unit.angstroms
@@ -36,15 +33,15 @@ rcutIn = 8*unit.angstroms
 rswitchIn = 5*unit.angstroms
 tau = 10*unit.femtoseconds
 gamma = 0.1/unit.femtoseconds
-reportInterval = 180
+reportInterval = 90//args.timestep
 
 platform = openmm.Platform.getPlatformByName(platform_name)
 properties = dict(Precision='mixed') if platform_name == 'CUDA' else dict()
 if args.device != 'None':
     properties['DeviceIndex'] = args.device
 
-pdb = app.PDBFile('water.pdb')
-forcefield = app.ForceField('water.xml')
+pdb = app.PDBFile('phenol-in-water.pdb')
+forcefield = app.ForceField('phenol-in-water.xml')
 openmm_system = forcefield.createSystem(pdb.topology,
                                         nonbondedMethod=openmm.app.PME,
                                         nonbondedCutoff=rcut,
@@ -56,18 +53,29 @@ nbforce.setUseSwitchingFunction(True)
 nbforce.setSwitchingDistance(rswitch)
 nbforce.setUseDispersionCorrection(False)
 
-integrator = openmm.LangevinIntegrator(temp, 1.0/unit.picoseconds, dt)
+if args.timestep > 3:
+    respa_system = atomsmm.RESPASystem(openmm_system, rcutIn, rswitchIn, fastExceptions=False)
+    loops = [6, args.timestep//3, 1]
+else:
+    respa_system = openmm_system
+    for force in respa_system.getForces():
+        if isinstance(force, openmm.NonbondedForce):
+            force.setReciprocalSpaceForceGroup(1)
+            force.setForceGroup(1)
+    loops = [2*args.timestep, 1]
 
-simulation = openmm.app.Simulation(pdb.topology, openmm_system, integrator, platform, properties)
+integrator = atomsmm.NewMethodIntegrator(dt, loops, temp, tau, gamma)
+
+simulation = openmm.app.Simulation(pdb.topology, respa_system, integrator, platform, properties)
 simulation.context.setPositions(pdb.positions)
 simulation.context.setVelocitiesToTemperature(temp, seed)
 
-computer = atomsmm.PressureComputer(openmm_system,
-        pdb.topology,
+#computer = atomsmm.PressureComputer(openmm_system,
+#        pdb.topology,
 #        openmm.Platform.getPlatformByName('CPU'),
-        openmm.Platform.getPlatformByName('CUDA'),
-        dict(Precision='mixed', DeviceIndex=args.secdev),
-        temperature=temp)
+#        openmm.Platform.getPlatformByName('CUDA'),
+#        dict(Precision='mixed', DeviceIndex=args.secdev),
+#        temperature=temp)
 
 dataReporter = atomsmm.ExtendedStateDataReporter(stdout, reportInterval, separator=',',
         step=True,
@@ -75,14 +83,14 @@ dataReporter = atomsmm.ExtendedStateDataReporter(stdout, reportInterval, separat
         kineticEnergy=True,
         totalEnergy=True,
         temperature=True,
-        atomicVirial=True,
-        atomicPressure=True,
-        nonbondedVirial=True,
-        molecularVirial=True,
-        molecularPressure=True,
-        molecularKineticEnergy=True,
-        coulombEnergy=True,
-        pressure_computer=computer,
+#        atomicVirial=True,
+#        atomicPressure=True,
+#        nonbondedVirial=True,
+#        molecularVirial=True,
+#        molecularPressure=True,
+#        molecularKineticEnergy=True,
+#        coulombEnergy=True,
+#        pressure_computer=computer,
         speed=True,
         extraFile=f'{base}.csv')
 
