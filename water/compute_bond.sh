@@ -12,5 +12,7 @@ file="rdf_H2O_#2_[Or_Hr].csv"
 sed 's/;/,/g' $file > $root/water/$dir/results/${name}_bond.csv
 
 values=$(grep "Mean value" ${name}_bond.output | sed -e 's/:/,/g' -e 's/pm/,/g' | cut -d"," -f2,4 | sed 's/ //g')
-line=$(echo "$2,$values")
-eval "sed -i 's/^$2.*/$line/' $root/water/$dir/results/bond_stats.csv"
+dt=$(echo $2 | sed 's/p/./')
+line=$(echo "$dt,$values")
+echo $line
+eval "sed -i 's/^$dt.*/$line/' $root/water/$dir/results/bond_stats.csv"

@@ -12,5 +12,6 @@ file="adf_H2O_#2_[O1r_H1r]-[O1r_H2r].csv"
 sed 's/;/,/g' $file > $root/water/$dir/results/${name}_angle.csv
 
 values=$(grep "Mean value" ${name}_angle.output | sed -e 's/:/,/g' -e 's/degree/,/g' | cut -d"," -f2,4 | sed 's/ //g')
-line=$(echo "$2,$values")
-eval "sed -i 's/^$2.*/$line/' $root/water/$dir/results/angle_stats.csv"
+dt=$(echo $2 | sed 's/p/./')
+line=$(echo "$dt,$values")
+eval "sed -i 's/^$dt.*/$line/' $root/water/$dir/results/angle_stats.csv"
