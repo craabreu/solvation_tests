@@ -47,6 +47,6 @@ secdev+=("1")
 
 name=sinr-${case[$1]}fs
 cd $name
-python simulate.py --device ${device[$1]} --secdev ${secdev[$1]} --timestep ${case[$1]} --nsteps ${nsteps[$1]}
-#babel -ipdb $name.pdb -oxyz $name.xyz
-#sed -i -e 's/Ow/O/g' -e 's/Hw/H/g' $name.xyz
+#python simulate.py --device ${device[$1]} --secdev ${secdev[$1]} --timestep ${case[$1]} --nsteps ${nsteps[$1]}
+babel -ipdb $name.pdb -oxyz $name.xyz
+sed -i -e 's/Ow/O/g' -e 's/Hw/H/g' $name.xyz
