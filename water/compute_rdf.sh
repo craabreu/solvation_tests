@@ -7,7 +7,7 @@ cd $dir/$name
 mkdir -p rdf
 cd rdf
 root=../../../..
-$root/travis/exe/travis -i $root/water/travis_rdf.inp -p ../$name.xyz > ${name}_rdf.output
+$root/travis/exe/travis -i $root/water/travis_rdf.inp -p ../$name.xyz #> ${name}_rdf.output
 gOO="rdf_H2O_#2_H2O_[Or_Oo].csv"
 gOH="rdf_H2O_#2_H2O_[Or_Ho].csv"
 gHH="rdf_H2O_#2_H2O_[Hr_Ho].csv"
