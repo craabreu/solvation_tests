@@ -5,7 +5,7 @@
 puts "Enter tool name (piny/openmm): "
 gets stdin tool
 
-puts "Enter time step (2 digits): "
+puts "Enter time step (0p5, 01, etc): "
 gets stdin dt
 
 puts "Enter description level (1/2/3): "
@@ -747,6 +747,6 @@ label textsize 1.0
 
 axes location off
 render Tachyon ${case} "/usr/local/lib/vmd/tachyon_LINUXAMD64" -aasamples 12 %s -format TARGA -o %s.tga -fullshade -res 900 960
-exec convert -density 300x300 ${case}.tga ${case}_${level}.png
+exec convert -density 300x300 ${case}.tga ${tool}_${case}_${level}.png
 exec rm ${case} ${case}.tga
 #exit

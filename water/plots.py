@@ -6,6 +6,11 @@ import figstyle
 import os
 
 tools = ['piny', 'openmm']
+step_size = {'0.5': 0.5}
+label = {'0.5': '0.5 fs (Langevin)'}
+for case in ['01', '03', '06', '09', '15', '30', '45', '90']:
+    step_size[case] = float(case)
+    label[case] = '{} fs'.format(int(case))
 
 def data(type, timesteps):
     repo = {tool:[] for tool in tools}
@@ -26,7 +31,7 @@ def plot_rdfs(timesteps):
         for dt, gr in zip(timesteps, rdf[tool]):
             distance = gr['Distance [pm]']/100
             for i, pair in enumerate(['O-O', 'O-H', 'H-H']):
-                ax[i].plot(distance, gr[f'g({pair})'], label='{} fs'.format(dt))
+                ax[i].plot(distance, gr[f'g({pair})'], label=label[dt])
                 ax[i].set_ylabel(f'g({pair})')
         ax[2].legend(loc='lower right', ncol=2)
         fig.savefig(f'{tool}_rdf.png')
@@ -40,7 +45,7 @@ def plot_bonds(timesteps):
         ax.set_xlabel('Distance (\\AA)')
         for dt, gr in zip(timesteps, bond[tool]):
             distance = gr['# Distance [pm]']/100
-            ax.plot(distance, gr['g(r)'], label='{} fs'.format(dt))
+            ax.plot(distance, gr['g(r)'], label=label[dt])
             ax.set_ylabel(f'frequency')
         ax.legend(loc='upper left', ncol=1)
         fig.savefig(f'{tool}_bond.png')
@@ -54,7 +59,7 @@ def plot_angles(timesteps):
         ax.set_xlabel('Angle (\\textdegree)')
         for dt, gr in zip(timesteps, angle[tool]):
             distance = gr['# Angle (degree)']
-            ax.plot(distance, gr['Occurrence'], label='{} fs'.format(dt))
+            ax.plot(distance, gr['Occurrence'], label=label[dt])
             ax.set_ylabel(f'frequency')
         ax.legend(loc='upper left', ncol=1)
         fig.savefig(f'{tool}_angle.png')
@@ -75,13 +80,36 @@ def plot_combined(timestep_pairs):
                 Y = np.array([float(y) for y in gr.columns[1:]])  # Angles
                 Z = gr.values[:, 1:]
                 cs = ax[i].contour(*np.meshgrid(X, Y), Z, linestyles=style)
-                cs.collections[0].set_label('{} fs'.format(dt))
+                cs.collections[0].set_label(label[dt])
             ax[i].set_ylabel('Angle (\\textdegree)')
             ax[i].legend(loc='lower left', ncol=1)
         fig.savefig(f'{tool}_combined.png')
 
-plot_rdfs(['0.5', '01', '03', '06', '09', '15', '30', '45', '90'])
-plot_bonds(['0.5', '01', '03', '06', '09', '15', '30', '45', '90'])
-plot_angles(['0.5', '01', '03', '06', '09', '15', '30', '45', '90'])
+# Average bonds and angles:
+def plot_averages(timesteps):
+    fig, ax = plt.subplots(2, 1, figsize=(3.37,4.6), sharex=True)
+    fig.suptitle(f'Average bond lengths and angles')
+    for i, type in enumerate(['bond', 'angle']):
+        for tool in tools:
+            df = pd.read_csv(f'{tool}/results/{type}_stats.csv')
+            dt, mean = df['dt'], df['mean']
+            if type == 'bond':
+                mean /= 100
+            ax[i].plot(dt, mean, marker='o', label=tool)
+            ax[i].legend(loc='lower left', ncol=1)
+    ax[1].set_xlabel('Time step size (fs)')
+    ax[0].set_xscale('log')
+    ax[0].set_ylabel('Bond length (\\AA)')
+    ax[0].legend(loc='upper right', ncol=1, title='$r_0 = 1.012$ \\AA')
+    ax[1].set_xscale('log')
+    ax[1].set_ylabel('Angle (\\textdegree)')
+    ax[1].legend(loc='lower right', ncol=1, title='$\\theta_0 = 113.24$\\textdegree')
+    fig.savefig('average_bonds_and_angles.png')
+
+all = ['0.5', '01', '03', '06', '09', '15', '30', '45', '90']
+plot_rdfs(all)
+plot_bonds(all)
+plot_angles(all)
 plot_combined([('0.5', '90'), ('06', '90')])
-# plt.show()
+plot_averages(all)
+plt.show()

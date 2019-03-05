@@ -5,7 +5,7 @@ params = {
 	'font.size': 8,
 	'text.usetex': True,
 	'lines.linewidth': 0.5,
-	'lines.markersize': 2,
+	'lines.markersize': 4,
 	'errorbar.capsize' : 2,
 	'legend.frameon': False,
 	'savefig.format': 'png',
