@@ -52,6 +52,12 @@ cd $name
 #sed -i -e 's/Ow/O/g' -e 's/Hw/H/g' $name.xyz
 
 properties='Temp PotEng Press MolPress Virial NBVirial MolVirial'
+# title='dt'
+# for prop in $properties; do
+#     title+=,$prop,rmse[$prop]
+# done
+# echo $title
+
 dt=$(echo ${case[$1]} | sed 's/p/./')
 values=$(postlammps -d comma -mm -c 83 -nt ineff $properties < ${name}.csv | \
          cut -d',' -f2,3 | \

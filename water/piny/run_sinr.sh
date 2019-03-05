@@ -12,6 +12,10 @@ cd $name
 # Extract properties:
 #../extract_properties.sh $1 > ${name}_properties.csv
 properties='Temp Einter Eintra Etotal Pinter Pintra Ptotal'
+# title='dt'
+# for prop in $properties; do
+#     title+=,$prop,rmse[$prop]
+# done
 
 dt=$(echo $1 | sed 's/p/./')
 values=$(postlammps -d comma -p -c 83 -nt ineff $properties < ${name}_properties.csv | \

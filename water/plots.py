@@ -108,7 +108,7 @@ def plot_bond_bond(timestep_pairs):
         fig.savefig(f'{tool}_bond_bond.png')
 
 # Average bonds and angles:
-def plot_averages(timesteps):
+def plot_bond_and_angle_averages(timesteps):
     fig, ax = plt.subplots(2, 1, figsize=(3.37,4.6), sharex=True)
     fig.suptitle(f'Average bond lengths and angles')
     ax[-1].set_xlabel('Time step size (fs)')
@@ -130,15 +130,28 @@ def plot_averages(timesteps):
 
 # Properties:
 def plot_properties(timesteps):
+    openmm = pd.read_csv('openmm/results/properties.csv')
+    piny = pd.read_csv('piny/results/properties.csv')
+
     fig, ax = plt.subplots(2, 1, figsize=(3.37,4.6), sharex=True)
     fig.suptitle(f'Average Properties')
     ax[-1].set_xlabel('Time step size (fs)')
+
+    ax[0].set_xscale('log')
+    ax[0].set_ylabel('Potential Energy (kJ/mol)')
+    E_lrc = -63.2297879351536
+    ax[0].plot(openmm['dt'], openmm['PotEng'], marker='o', label='openmm')
+    ax[0].plot(piny['dt'], 627.50921*4.184*piny['Etotal'], marker='o', label='piny')
+    print(120.274271145*piny['Etotal'])
+
+    ax[0].legend(loc='upper left', ncol=1)
 
 all = ['0.5', '01', '03', '06', '09', '15', '30', '45', '90']
 # plot_rdfs(all)
 # plot_bonds(all)
 # plot_angles(all)
 # plot_combined([('0.5', '90'), ('06', '90')])
-plot_bond_bond([('0.5', '90'), ('06', '90')])
-# plot_averages(all)
+# plot_bond_bond([('0.5', '90'), ('06', '90')])
+# plot_bond_and_angle_averages(all)
+plot_properties(all)
 plt.show()
