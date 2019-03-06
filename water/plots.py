@@ -5,9 +5,10 @@ import pandas as pd
 import figstyle
 import os
 
+dt_scaling = 'log'
 tools = ['piny', 'openmm']
 step_size = {'0.5': 0.5}
-label = {'0.5': '0.5 fs (Langevin)'}
+label = {'0.5': '0.5 fs (*)'}
 for case in ['01', '03', '06', '09', '15', '30', '45', '90']:
     step_size[case] = float(case)
     label[case] = '{} fs'.format(int(case))
@@ -120,10 +121,10 @@ def plot_bond_and_angle_averages(timesteps):
                 mean /= 100
             ax[i].plot(dt, mean, marker='o', label=tool)
             ax[i].legend(loc='lower left', ncol=1)
-    ax[0].set_xscale('log')
+    ax[0].set_xscale(dt_scaling)
     ax[0].set_ylabel('Bond length (\\AA)')
     ax[0].legend(loc='upper right', ncol=1, title='$r_0 = 1.012$ \\AA')
-    ax[1].set_xscale('log')
+    ax[1].set_xscale(dt_scaling)
     ax[1].set_ylabel('Angle (\\textdegree)')
     ax[1].legend(loc='lower right', ncol=1, title='$\\theta_0 = 113.24$\\textdegree')
     fig.savefig('average_bonds_and_angles.png')
@@ -137,14 +138,31 @@ def plot_properties(timesteps):
     fig.suptitle(f'Average Properties')
     ax[-1].set_xlabel('Time step size (fs)')
 
-    ax[0].set_xscale('log')
-    ax[0].set_ylabel('Potential Energy (kJ/mol)')
-    E_lrc = -63.2297879351536
-    ax[0].plot(openmm['dt'], openmm['PotEng'], marker='o', label='openmm')
-    ax[0].plot(piny['dt'], 627.50921*4.184*piny['Etotal'], marker='o', label='piny')
-    print(120.274271145*piny['Etotal'])
+    Econv = 627.50921*4.184
 
-    ax[0].legend(loc='upper left', ncol=1)
+    energy = ax[0]
+    energy.set_xscale(dt_scaling)
+    energy.set_ylabel('Potential Energy (kJ/mol)')
+    # E_lrc = -63.2297879351536
+    energy.plot(openmm['dt'], openmm['PotEng'], marker='o', label='openmm')
+    energy.plot(piny['dt'], Econv*piny['Etotal'], marker='o', label='piny')
+    energy.legend(loc='upper left', ncol=1)
+
+    pressure = ax[1]
+    pressure.set_xscale(dt_scaling)
+    pressure.set_ylabel('Pressure (atm)')
+    pressure.plot(openmm['dt'], openmm['Press'], marker='o', label='openmm')
+
+    N = 512*3
+    V = 24.653**3  # A³
+    kB = 8.31451E-7  # Boltzmann constant in Da*A²/(fs²*K)
+    Pconv = 1.6388244954E+8  # Da/(A*fs²) to atm
+    T = 298.15  # K
+    P = piny['Ptotal'] - Pconv*N*kB*(piny['Temp'] - T)/V
+    pressure.plot(piny['dt'], P, marker='o', label='piny')
+    pressure.legend(loc='upper left', ncol=1)
+
+    fig.savefig('average_properties.png')
 
 all = ['0.5', '01', '03', '06', '09', '15', '30', '45', '90']
 # plot_rdfs(all)
