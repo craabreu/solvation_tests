@@ -24,18 +24,14 @@ def data(type, timesteps):
 # Intermolecular radial distribution functions:
 def plot_rdfs(timesteps):
     rdf = data('rdf', timesteps)
-    for tool in tools:
-        fig, ax = plt.subplots(3, 1, figsize=(3.37,5.6), sharex=True)
-        fig.suptitle(f'Radial distribution functions ({tool})')
-        fig.subplots_adjust(hspace=0.1)
-        ax[-1].set_xlabel('Distance (\\AA)')
-        for dt, gr in zip(timesteps, rdf[tool]):
-            distance = gr['Distance [pm]']/100
-            for i, pair in enumerate(['O-O', 'O-H', 'H-H']):
-                ax[i].plot(distance, gr[f'g({pair})'], label=label[dt])
-                ax[i].set_ylabel(f'g({pair})')
-        ax[2].legend(loc='lower right', ncol=2)
-        fig.savefig(f'{tool}_rdf.png')
+    fig, ax = plt.subplots(1, 1, figsize=(3.37,2.3))
+    fig.suptitle(f'Radial distribution functions (openmm)')
+    ax.set_xlabel('Distance (\\AA)')
+    for dt, gr in zip(timesteps, rdf['openmm']):
+        distance = gr['Distance [pm]']/100
+        ax.plot(distance, gr['g(r)'], label=label[dt])
+    ax.legend(loc='lower right', ncol=2)
+    fig.savefig(f'openmm_rdf.png')
 
 # Bond length distributions:
 def plot_bonds(timesteps):
@@ -165,11 +161,11 @@ def plot_properties():
     fig.savefig('average_properties.png')
 
 all = ['0.5', '01', '03', '06', '09', '15', '30', '45', '90']
-# plot_rdfs(all)
+plot_rdfs(all)
 # plot_bonds(all)
 # plot_angles(all)
 # plot_combined([('0.5', '90'), ('06', '90')])
 # plot_bond_bond([('0.5', '90'), ('06', '90')])
 # plot_bond_and_angle_averages()
-plot_properties()
+# plot_properties()
 plt.show()
