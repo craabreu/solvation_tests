@@ -165,11 +165,11 @@ def plot_properties():
     fig.savefig('average_properties.png')
 
 all = ['0.5', '01', '03', '06', '09', '15', '30', '45', '90']
-# plot_rdfs(all)
-# plot_bonds(all)
-# plot_angles(all)
-# plot_combined([('0.5', '90'), ('06', '90')])
-# plot_bond_bond([('0.5', '90'), ('06', '90')])
-# plot_bond_and_angle_averages()
+plot_rdfs(all)
+plot_bonds(all)
+plot_angles(all)
+plot_combined([('0.5', '90'), ('06', '90')])
+plot_bond_bond([('0.5', '90'), ('06', '90')])
+plot_bond_and_angle_averages()
 plot_properties()
 plt.show()
