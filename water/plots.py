@@ -133,6 +133,7 @@ def plot_bond_and_angle_averages():
 def plot_properties():
     openmm = pd.read_csv('openmm/results/properties.csv')
     piny = pd.read_csv('piny/results/properties.csv')
+    memory = pd.read_csv('memory/results/properties.csv')
 
     fig, ax = plt.subplots(2, 1, figsize=(3.37,4.6), sharex=True)
     fig.suptitle(f'Average Properties')
@@ -146,6 +147,7 @@ def plot_properties():
     # E_lrc = -63.2297879351536
     energy.plot(openmm['dt'], openmm['PotEng'], marker='o', label='openmm')
     energy.plot(piny['dt'], Econv*piny['Etotal'], marker='o', label='piny')
+    energy.plot(memory['dt'], memory['PotEng'], marker='o', label='memory RESPA')
     energy.legend(loc='upper left', ncol=1)
 
     pressure = ax[1]
@@ -160,16 +162,17 @@ def plot_properties():
     T = 298.15  # K
     P = piny['Ptotal'] - Pconv*N*kB*(piny['Temp'] - T)/V
     pressure.plot(piny['dt'], P, marker='o', label='piny')
-    pressure.legend(loc='upper left', ncol=1)
 
+    pressure.plot(memory['dt'], memory['Press'], marker='o', label='memory RESPA')
+    pressure.legend(loc='upper left', ncol=1)
     fig.savefig('average_properties.png')
 
 all = ['0.5', '01', '03', '06', '09', '15', '30', '45', '90']
-plot_rdfs(all)
-plot_bonds(all)
-plot_angles(all)
-plot_combined([('0.5', '90'), ('06', '90')])
-plot_bond_bond([('0.5', '90'), ('06', '90')])
-plot_bond_and_angle_averages()
+# plot_rdfs(all)
+# plot_bonds(all)
+# plot_angles(all)
+# plot_combined([('0.5', '90'), ('06', '90')])
+# plot_bond_bond([('0.5', '90'), ('06', '90')])
+# plot_bond_and_angle_averages()
 plot_properties()
 plt.show()
