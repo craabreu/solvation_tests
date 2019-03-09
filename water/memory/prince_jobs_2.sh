@@ -13,4 +13,4 @@
 module purge
 module load cuda/9.2.88
 parallel ./run.sh ::: 4 5
-./run.sh 6
+parallel ./run.sh ::: 7 6

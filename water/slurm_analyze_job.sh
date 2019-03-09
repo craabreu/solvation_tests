@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=14
 #SBATCH --time=1:00:00
 #SBATCH --mem=20GB
-#SBATCH --job-name=analyze_sinr
+#SBATCH --job-name=analyze_L4
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ca2356@nyu.edu
 #SBATCH --output=slurm_%j.out
@@ -15,4 +15,5 @@
 #module load fftw/3.3.8
 
 #parallel ./analyze_sinr.sh piny ::: 06 09 15 30 45 90
-parallel ./analyze_sinr.sh openmm ::: 03 06 09 15 30 45 90
+#parallel ./analyze_sinr.sh openmm ::: 03 06 09 15 30 45 90
+parallel ./analyze_sinr.sh memory_L4 ::: 03 06 09 15 24 27 30 33 36 45 90

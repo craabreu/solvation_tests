@@ -1,9 +1,9 @@
 #!/bin/bash
 
-case+=("0p5")
-nsteps+=("7200000")
-device+=("0")
-secdev+=("1")
+#case+=("0p5")
+#nsteps+=("7200000")
+#device+=("0")
+#secdev+=("1")
 
 case+=("01")
 nsteps+=("3600000")
@@ -17,13 +17,13 @@ secdev+=("1")
 
 case+=("06")
 nsteps+=("600000")
-device+=("2")
-secdev+=("3")
+device+=("0")
+secdev+=("1")
 
 case+=("09")
 nsteps+=("400000")
-device+=("0")
-secdev+=("1")
+device+=("2")
+secdev+=("3")
 
 case+=("15")
 nsteps+=("240000")
@@ -44,6 +44,31 @@ case+=("90")
 nsteps+=("40000")
 device+=("0")
 secdev+=("1")
+
+
+case+=("27")
+nsteps+=("120000")
+device+=("2")
+secdev+=("3")
+
+case+=("33")
+nsteps+=("120000")
+device+=("0")
+secdev+=("1")
+
+case+=("24")
+nsteps+=("120000")
+device+=("2")
+secdev+=("3")
+
+case+=("36")
+nsteps+=("120000")
+device+=("0")
+secdev+=("1")
+
+
+
+
 
 name=sinr-${case[$1]}fs
 cd $name
